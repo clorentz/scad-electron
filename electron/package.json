@@ -1,0 +1,22 @@
+{
+  "name": "scad-electron",
+  "version": "1.0.0",
+  "description": "The desktop version for the SCAD project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "clorentz",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^3.0.13"
+  },
+  "dependencies": {
+    "googleapis": "^36.0.0",
+    "path": "^0.12.7",
+    "quick-encrypt": "^1.0.8",
+    "readline": "^1.3.0",
+    "stream": "^0.0.2"
+  }
+}
