@@ -1,3 +1,13 @@
+# Electron app
+
+## Electron build
+ 
+ Run `npm run electron:build` to build the project in the electron/app directory
+
+ ## Electron start
+
+Run `npm run electron:start` to start the electron application
+
 # Cli
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.0.6.

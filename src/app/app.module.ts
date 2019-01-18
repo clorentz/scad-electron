@@ -10,9 +10,9 @@ import { AppComponent } from './app.component';
 import { CliViewComponent } from './cli-view/cli-view.component';
 import { AdminViewComponent } from './admin-view/admin-view.component';
 import { CliLoginComponent } from './cli-login/cli-login.component';
-// import { AppendInitVectComponent } from './cli-view/append-init-vect/append-init-vect.component';
 import { NgxElectronModule } from 'ngx-electron';
 import { HttpClientModule } from '@angular/common/http';
+import { UploadModule } from './cli-view/upload/upload.module';
 
 @NgModule({
   declarations: [
@@ -20,7 +20,6 @@ import { HttpClientModule } from '@angular/common/http';
     CliViewComponent,
     AdminViewComponent,
     CliLoginComponent,
-    // AppendInitVectComponent
    ],
   imports: [
     BrowserModule,
@@ -32,7 +31,8 @@ import { HttpClientModule } from '@angular/common/http';
     MatFormFieldModule,
     MatInputModule, 
     NgxElectronModule, 
-    HttpClientModule,
+    HttpClientModule, 
+    UploadModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -2,6 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
 const path = require('path');
+const IncomingForm = require('formidable').IncomingForm;
 
 class driveHandler {
     
@@ -84,15 +85,16 @@ authorize(credentials) {
     });
     return res.data.files;
   }
+
   /* Function to create and upload a file 
      Usage: node drive.js create path
   */
-  createFile(filePath) {
-    console.log(filePath);
+  async createFile(name, filePath) {
     let auth = this.auth;
+    let res = {"fileId": "", "keyId": ""};
     var drive = google.drive({ version: 'v3', auth });
     var fileMetadata = {
-      'name': path.basename(filePath)
+      'name': name
     };
     var media = {
       mimeType: 'text/plain', 
@@ -103,34 +105,26 @@ authorize(credentials) {
       body: fs.createReadStream(filePath+".key")
     }
   
-    drive.files.create({
+    const fileRes = await drive.files.create({
       resource: fileMetadata,
       media: media,
       fields: 'id'
-    }, function (err, file) {
-      if (err) {
-        // Handle error
-        console.error(err);
-      } else {
-        console.log(`File uploaded with Id ${file.data.id}`);
-        fs.unlinkSync(filePath+".enc");
-      }
     });
-    drive.files.create({
+    console.log(`File uploaded with Id ${fileRes.data.id}`);
+    res.fileId = fileRes.data.id;
+    fs.unlinkSync(filePath+".enc");
+      
+    const keyRes = await drive.files.create({
       resource: {
         'name': fileMetadata["name"] + ".key"
       },
       media: key_media,
       fields: 'id'
-    }, function (err, file) {
-      if (err) {
-        // Handle error
-        console.error(err);
-      } else {
-        console.log(`File key uploaded with Id ${file.data.id}`);
-        fs.unlinkSync(filePath+".key");
-      }
     });
+    console.log(`File key uploaded with Id ${keyRes.data.id}`);
+    res.keyId = keyRes.data.id;
+    fs.unlinkSync(filePath+".key");
+    return res;
   }
   
   /* Function to delete an uploaded file 

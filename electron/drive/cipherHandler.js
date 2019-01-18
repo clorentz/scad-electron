@@ -2,6 +2,7 @@ const path = require('path');
 const crypto = require('crypto');
 const asym_crypto = require('quick-encrypt');
 const fs = require('fs');
+const IncomingForm = require('formidable').IncomingForm;
 
 const AppendInitVect = require('./appendInitVect');
 
@@ -25,17 +26,21 @@ class cipherHandler {
     setDriveHandler(driveHandler) {
         this.driveHandler = driveHandler;
     }
+
     /* 
  * Function in which will be integrated the file encryption 
  * @param Path of the file to be encrypted
  */
-    encrypt(filePath) {
-        // var name = path.basename(filePath);
-        if (typeof filePath === 'undefined') {
-            console.error("Please type the name of the file as an argument");
-            return;
-        }
-
+    async encrypt(req, res) {
+        var form = new IncomingForm();
+        var keys = this.keys;
+        var uploadRes;
+        form.on('file', (field, file) => {
+          // Do something with the file
+          // e.g. save it to the database
+          // you can access it using file.path
+          let name = file.name;
+          let filePath = file.path;
         // Generation of a random initialization vector
         const initVect = crypto.randomBytes(16);
 
@@ -56,12 +61,17 @@ class cipherHandler {
         var cipherKeyFile = fs.createWriteStream(filePath + ".key"); // Creation of the key File
         // Asymetric encryption of the file key 
         // The base64 option allows to keep the correct key size
-        cipherKeyFile.write(asym_crypto.encrypt(CIPHER_KEY.toString('base64'), this.keys.public));
+        cipherKeyFile.write(asym_crypto.encrypt(CIPHER_KEY.toString('base64'), keys.public));
 
         writeStream.on('finish', () => {
             console.log("File encrypted");
-            this.driveHandler.createFile(filePath); // call for the upload of the file
+            // TODO link to the database here
+            this.driveHandler.createFile(name, filePath).then(ret => {console.log(ret);}); // call for the upload of the file
         });
+    });
+    form.on('end', () => {
+    });
+    form.parse(req);
 
     }
 

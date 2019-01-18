@@ -5,6 +5,13 @@ const path = require('path');
 const url = require('url');
 var express = require("express");
 var expressApp = express(); 
+const cors = require('cors');
+var corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 200
+};
+
+expressApp.use(cors(corsOptions));
 expressApp.use(express.json());
 
 // If modifying these scopes, delete token.json.
@@ -18,9 +25,9 @@ cipherHandler.setDriveHandler(driveHandler);
 driveHandler.setCipherHandler(cipherHandler);
 
 expressApp.post("/upload", (req, res) => {
-  console.log(req.body);
-  res.json({"res": cipherHandler.encrypt(req.body.filePath)});
+  cipherHandler.encrypt(req, res).then(ret => res.json(ret));
 });
+
 expressApp.post("/download", (req, res) => {
   console.log(req.body);
   res.json({"res": driveHandler.downloadFile(req.body.fileId)});

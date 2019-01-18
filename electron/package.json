@@ -10,7 +10,8 @@
   "author": "clorentz",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^3.0.13"
+    "electron": "^3.0.13",
+    "ngx-electron": "^2.1.1"
   },
   "dependencies": {
     "googleapis": "^36.0.0",
