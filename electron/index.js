@@ -18,9 +18,21 @@ expressApp.use(express.json());
 // const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 const TOKEN_PATH = './tokens/token.json';
-
+var database;
 var cipherHandler = new CipherHandler();
 var driveHandler = new DriveHandler(SCOPES, TOKEN_PATH);
+
+var MongoClient = require('mongodb').MongoClient;
+var dbUrl = "mongodb://localhost:27017/";
+
+MongoClient.connect(dbUrl, function(err, db) {
+  if (err) throw err;
+  var dbo = db.db("scad");
+  cipherHandler.setDatabase(dbo);
+  driveHandler.setDatabase(dbo);
+  database = db;
+}); 
+
 cipherHandler.setDriveHandler(driveHandler);
 driveHandler.setCipherHandler(cipherHandler);
 
@@ -29,38 +41,29 @@ expressApp.post("/upload", (req, res) => {
 });
 
 expressApp.post("/download", (req, res) => {
-  console.log(req.body);
-  res.json({"res": driveHandler.downloadFile(req.body.fileId)});
+  res.json({"res": driveHandler.downloadFile(req.body.name)});
 });
 
 expressApp.post("/delete", (req, res) => {
-  res.json({"res": driveHandler.test()});
+  res.json({"res": driveHandler.deleteFile(req.body.name)});
 });
 expressApp.post("/list", (req, res) => {
-  driveHandler.listFiles().then(ret => res.json(ret));
+  database.db("scad").collection("filesCollection").find({}).toArray(function(err, result) {
+    if (err) throw err;
+    res.json(result);
+  });
 });
 expressApp.get("/clean", (req, res) => {
   driveHandler.cleanDrive(); 
   res.json({"res": "Drive cleaned"});
 });
-expressApp.listen(3000);
+expressApp.listen(3002);
 console.log("Express started");
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
 
 function createWindow() { 
-  // const electronScreen = import screen from "electron";
-  // const size = electronScreen.getPrimaryDisplay().workAreaSize;
-
-  // // Create the browser window.
-  // win = new BrowserWindow({
-  //   x: 0,
-  //   y: 0,
-  //   width: size.width,
-  //   height: size.height
-  // });
-
   // Create the browser window.
   win = new BrowserWindow({ width: 800, height: 600 });
 
@@ -97,6 +100,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+  database.close();
 });
 
 app.on('activate', () => {

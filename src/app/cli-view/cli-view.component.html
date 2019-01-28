@@ -1,23 +1,29 @@
 <h1> Welcome to the user page! You can upload your files here</h1>
 
-<div class="dropzone">
-  <div class="text-wrapper">
-    <div class="centered">Drop your file here!</div>
-    <button (click)="delete();">
-      deleteTest
-    </button>
-    <button (click)="list();">
-      listTest
-    </button>
-    <button (click)="clean();">
-      cleanTest
-    </button>
-    <button (click)="download();">
-      downloadTest
-    </button>
-  </div>
+<button (click)="clean();">
+  Clean Drive
+</button>
 
+
+<h2>Uploaded Files</h2>
+<ul class="files">
+  <li *ngFor="let file of files" [class.selected]="file === selectedFile" (click)="onSelect(file)">
+    {{file.name}}
+  </li>
+</ul>
+
+<div *ngIf="selectedFile">
+
+  <h2>{{selectedFile.name | uppercase}} Details</h2>
+  <div><span>File id: </span>{{selectedFile.fileId}}</div>
+  <div><span>Key id: </span>{{selectedFile.keyId}}</div>
+  <button (click)="delete(selectedFile.name);">
+    Delete File
+  </button>
+  <button (click)="download(selectedFile.name);">
+    Download File
+  </button>
 </div>
-    <div class="upload">
-      <app-upload></app-upload>
-    </div>
+<div class="upload">
+  <app-upload></app-upload>
+</div>

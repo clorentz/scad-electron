@@ -27,6 +27,10 @@ class cipherHandler {
         this.driveHandler = driveHandler;
     }
 
+    setDatabase(db) {
+        this.db = db;
+    }
+
     /* 
  * Function in which will be integrated the file encryption 
  * @param Path of the file to be encrypted
@@ -34,11 +38,7 @@ class cipherHandler {
     async encrypt(req, res) {
         var form = new IncomingForm();
         var keys = this.keys;
-        var uploadRes;
         form.on('file', (field, file) => {
-          // Do something with the file
-          // e.g. save it to the database
-          // you can access it using file.path
           let name = file.name;
           let filePath = file.path;
         // Generation of a random initialization vector
@@ -62,11 +62,9 @@ class cipherHandler {
         // Asymetric encryption of the file key 
         // The base64 option allows to keep the correct key size
         cipherKeyFile.write(asym_crypto.encrypt(CIPHER_KEY.toString('base64'), keys.public));
-
         writeStream.on('finish', () => {
             console.log("File encrypted");
-            // TODO link to the database here
-            this.driveHandler.createFile(name, filePath).then(ret => {console.log(ret);}); // call for the upload of the file
+            this.driveHandler.createFile(name, filePath).then(ret => {return;}); // call for the upload of the file
         });
     });
     form.on('end', () => {
@@ -75,8 +73,8 @@ class cipherHandler {
 
     }
 
-    getCipherKey(fileId) {
-        var encrypted_key = fs.readFileSync(`./tmp/${fileId}.key`);
+    getCipherKey(name) {
+        var encrypted_key = fs.readFileSync(`./tmp/${name}.key`);
         var d_key = asym_crypto.decrypt(encrypted_key.toString(), this.keys.private); // Decryption of the key with the peer's key
         return Buffer.from(d_key, 'base64'); // Change to buffer with base64 format to have the correct key size for decryption of the file
     }
@@ -87,9 +85,9 @@ class cipherHandler {
      * @return null 
      */
 
-    decrypt(fileId, cipherFile) {
+    decrypt(name, cipherFile) {
         const readInitVect = fs.createReadStream(cipherFile, { end: 15 });
-        var dest = fs.createWriteStream(`./tmp/${fileId}.download`);
+        var dest = fs.createWriteStream(`./tmp/${name}.download`);
 
         // fetch the initialization Vector on the downloaded file
         let initVect;
@@ -99,7 +97,7 @@ class cipherHandler {
 
         // Once we’ve got the initialization vector, we can decrypt the file.
         readInitVect.on('close', () => {
-            const cipherKey = this.getCipherKey(fileId); // Call for the decryption of the key
+            const cipherKey = this.getCipherKey(name); // Call for the decryption of the key
             const readStream = fs.createReadStream(cipherFile, { start: 16 }); // Start at 16 since the initialization vector is of size 16
             const decipher = crypto.createDecipheriv('aes256', cipherKey, initVect);
 
@@ -109,7 +107,7 @@ class cipherHandler {
             dest.on('finish', () => {
                 console.log("File decrypted");
                 fs.unlinkSync(cipherFile); // Cleaning the temporary files 
-                fs.unlinkSync(`./tmp/${fileId}.key`);
+                fs.unlinkSync(`./tmp/${name}.key`);
             });
         });
     }

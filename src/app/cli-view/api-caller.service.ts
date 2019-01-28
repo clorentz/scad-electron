@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpRequest, HttpEventType, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { Observable } from 'rxjs';
 
+const httpOptions = {
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+};
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +17,6 @@ export class ApiCallerService {
   public upload(files: Set<File>): {[key:string]:Observable<number>} {
     // this will be the our resulting map
     const status = {};
-
     files.forEach(file => {
       // create a new multipart-form for every file
       const formData: FormData = new FormData();
@@ -22,7 +24,7 @@ export class ApiCallerService {
 
       // create a http-post request and pass the form
       // tell it to report the upload progress
-      const req = new HttpRequest('POST', "http://localhost:3000/upload", formData, {
+      const req = new HttpRequest('POST', "http://localhost:3002/upload", formData, {
         reportProgress: true
       });
 
@@ -45,21 +47,52 @@ export class ApiCallerService {
           progress.complete();
         }
       });
-      this.http.request(req).subscribe(
-        res => {
-          console.log(res);
-        },
-        err => {
-          console.log("Error occured");
-          
-        });
       // Save every progress-observable in a map of all observables
       status[file.name] = {
         progress: progress.asObservable()
       };
     });
-
     // return the map of progress.observables
     return status;
+  }
+
+  download(name) {
+    let body = JSON.stringify({"name": name});
+    this.http.post('http://localhost:3002/download/', body, httpOptions)
+    .subscribe(
+      res => {
+        console.log(res);
+      },
+      err => {
+        console.log("Error occured");
+        
+      });
+  }
+  
+  delete(name) {
+    let body = JSON.stringify({"name": name});
+    this.http.post('http://localhost:3002/delete/', body, httpOptions)
+    .subscribe(
+      res => {
+        console.log(res);
+      },
+      err => {
+        console.log("Error occured");
+        
+      });
+  }
+
+  list() {
+    let body = JSON.stringify({"id": 1111});
+    return this.http.post('http://localhost:3002/list/', body, httpOptions);
+  }
+
+  clean() {
+    this.http.get('http://localhost:3002/clean').subscribe(res => {
+      console.log(res);
+    }, 
+    err => {
+      console.log("Error occured: " + err);
+    });
   }
 }

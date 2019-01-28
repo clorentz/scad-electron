@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { DialogComponent } from './dialog/dialog.component';
-import { ApiCallerService } from './api-caller.service';
+import { ApiCallerService } from '../api-caller.service';
 
 @Component({
   selector: 'app-upload',

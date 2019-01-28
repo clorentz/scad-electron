@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ApiCallerService } from './api-caller.service';
+import { File } from './File';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -11,54 +13,36 @@ const httpOptions = {
   styleUrls: ['./cli-view.component.css']
 })
 export class CliViewComponent implements OnInit {
-
-  constructor(private http:HttpClient) { }
-
-  create() {
-    let body = JSON.stringify({"filePath": "./drive/test.txt"});
-    this.http.post('http://localhost:3000/upload/', body, httpOptions)
-    .subscribe(
-      res => {
-        console.log(res);
-      },
-      err => {
-        console.log("Error occured");
-        
-      });
+  files : File[] = new Array();
+  selectedFile: File;
+  constructor(private http:HttpClient, private apiCallerService: ApiCallerService) { 
+    this.getFileList();
   }
 
-  download() {
-    let body = JSON.stringify({"fileId": "1QUEhBQEF5YSSCXKjcukpDmgmHQBwqS9q"});
-    this.http.post('http://localhost:3000/download/', body, httpOptions)
-    .subscribe(
-      res => {
-        console.log(res);
-      },
-      err => {
-        console.log("Error occured");
-        
-      });
+  download(name) {
+    this.apiCallerService.download(name);
   }
   
-  delete() {
-    let body = JSON.stringify({"id": 1111});
-    this.http.post('http://localhost:3000/delete/', body, httpOptions)
-    .subscribe(
-      res => {
-        console.log(res);
-      },
-      err => {
-        console.log("Error occured");
-        
-      });
+  delete(name) {
+    this.apiCallerService.delete(name);
   }
 
   list() {
-    let body = JSON.stringify({"id": 1111});
-    this.http.post('http://localhost:3000/list/', body, httpOptions)
+    console.log(this.apiCallerService.list());
+  }
+
+  clean() {
+    this.apiCallerService.clean();
+  }
+
+  getFileList() {
+    this.apiCallerService.list()
     .subscribe(
-      res => {
-        console.log(res);
+      (res: any) => {
+        res.forEach(file => {
+           this.files.push({name: file.name, fileId: file.fileId, keyId: file.keyId});
+        });
+  
       },
       err => {
         console.log("Error occured");
@@ -66,13 +50,8 @@ export class CliViewComponent implements OnInit {
       });
   }
 
-  clean() {
-    this.http.get('http://localhost:3000/clean').subscribe(res => {
-      console.log(res);
-    }, 
-    err => {
-      console.log("Error occured: " + err);
-    });
+  onSelect(file: File): void {
+    this.selectedFile = file;
   }
 
   ngOnInit() {

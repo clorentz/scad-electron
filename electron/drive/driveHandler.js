@@ -20,9 +20,9 @@ class driveHandler {
       this.cipherHandler = cipherHandler;
     }
 
-    test() {
-        return "bite";
-    }
+    setDatabase(db) {
+      this.db = db;
+  }
 
     /**
  * Create an OAuth2 client with the given credentials, and then execute the
@@ -91,7 +91,7 @@ authorize(credentials) {
   */
   async createFile(name, filePath) {
     let auth = this.auth;
-    let res = {"fileId": "", "keyId": ""};
+    let res = {"fileId": "", "keyId": "", "name": name};
     var drive = google.drive({ version: 'v3', auth });
     var fileMetadata = {
       'name': name
@@ -110,7 +110,6 @@ authorize(credentials) {
       media: media,
       fields: 'id'
     });
-    console.log(`File uploaded with Id ${fileRes.data.id}`);
     res.fileId = fileRes.data.id;
     fs.unlinkSync(filePath+".enc");
       
@@ -121,22 +120,29 @@ authorize(credentials) {
       media: key_media,
       fields: 'id'
     });
-    console.log(`File key uploaded with Id ${keyRes.data.id}`);
     res.keyId = keyRes.data.id;
     fs.unlinkSync(filePath+".key");
+    this.db.collection('filesCollection').insertOne(res);
     return res;
   }
   
   /* Function to delete an uploaded file 
      Usage: node drive.js rm fileId
   */
-  deleteFile(param) {
-    var fileId = param;
+  deleteFile(name) {
     let auth = this.auth;
     const drive = google.drive({ version: 'v3', auth });
-    console.log(`Deleting file ${fileId}`);
-    drive.files.delete({
-      'fileId': fileId
+    this.db.collection("filesCollection").findOne({"name": name}).then(file => {
+      console.log(`Deleting file ${name} with id ${file.fileId} and keyId ${file.keyId}`);
+      drive.files.delete({
+        'fileId': file.fileId
+      }).then(fileDeleteRes => {
+        drive.files.delete({
+          'fileId': file.keyId
+        }).then(keyDeleteRes => {
+          this.db.collection("filesCollection").deleteOne({"name": name}).then(res => console.log("File in the database deleted"));
+        });
+      });
     });
   }
   
@@ -154,13 +160,16 @@ authorize(credentials) {
       if (err) return console.log('The API returned an error: ' + err);
       const files = res.data.files;
       if (files.length) {
-        console.log('Deleting files:');
+        console.log('Deleting files...');
         files.map((file) => {
-          console.log(`${file.name} (${file.id})`);
           drive.files.delete({
             'fileId': file.id
+          }).then(delRes => {
+            console.log(`${file.name} (${file.id})`);
           });
         });
+        this.db.collection("filesCollection").drop();
+        console.log('Database cleaned');
       } else {
         console.log('No files found.');
       }
@@ -197,42 +206,39 @@ authorize(credentials) {
   
   /* Function used to call the api and download a file by Id
   */
-  downloadFile(param) {
+  downloadFile(name) {
     let auth = this.auth;
-    if (typeof param === "undefined") {
-      console.error("Please give and Id as argument to download the file");
-      return;
-    }
     const drive = google.drive({ version: 'v3', auth });
-    var fileId = param;
-    var crypted_dest = fs.createWriteStream(`./tmp/${fileId}_encrypted_download`);
+    var crypted_dest = fs.createWriteStream(`./tmp/${name}_encrypted_download`);
     var cipherHandler = this.cipherHandler;
-    drive.files.get({ fileId: fileId, alt: 'media' }, { responseType: 'stream' },
-      function (err, res) {
-        res.data
-          .on('end', () => {
-            console.log(`Downloaded file ${fileId}`);
-            var cipherKey = fs.createWriteStream(`./tmp/${fileId}.key`);
-            // Launch of an API call to download the key
-            // TODO: get the key ID in database
-            drive.files.get({ fileId: "1kVeS9-r0Orxq5VPnyZ548BfecWLgvZrO", alt: 'media' }, { responseType: 'stream' },
-              function (cipherErr, cipherRes) {
-                cipherRes.data
-                  .on('end', () => {
-                    console.log(`Downloaded key`);
-                    cipherHandler.decrypt(fileId,`./tmp/${fileId}_encrypted_download`);
-                  })
-                  .on('error', cipherErr => {
-                    console.log('Error', err);
-                  })
-                  .pipe(cipherKey);
-              });
-          })
-          .on('error', err => {
-            console.log('Error', err);
-          })
-          .pipe(crypted_dest);
-      });
+    this.db.collection("filesCollection").findOne({"name": name}).then(file => {
+      console.log(`Downloading file ${name} with id ${file.fileId} and keyId ${file.keyId}`);  
+      drive.files.get({ fileId: file.fileId, alt: 'media' }, { responseType: 'stream' },
+        function (err, res) {
+          res.data
+            .on('end', () => {
+              console.log(`Downloaded file ${file.name}`);
+              var cipherKey = fs.createWriteStream(`./tmp/${file.name}.key`);
+              // Launch of an API call to download the key
+              drive.files.get({ fileId: file.keyId, alt: 'media' }, { responseType: 'stream' },
+                function (cipherErr, cipherRes) {
+                  cipherRes.data
+                    .on('end', () => {
+                      console.log(`Downloaded key`);
+                      cipherHandler.decrypt(name,`./tmp/${name}_encrypted_download`);
+                    })
+                    .on('error', cipherErr => {
+                      console.log('Error', err);
+                    })
+                    .pipe(cipherKey);
+                });
+            })
+            .on('error', err => {
+              console.log('Error', err);
+            })
+            .pipe(crypted_dest);
+        });
+    });
   }
   
 }

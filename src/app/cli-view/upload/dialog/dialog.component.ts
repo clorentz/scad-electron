@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material';
-import { ApiCallerService } from '../api-caller.service';
+import { ApiCallerService } from '../../api-caller.service';
 import { forkJoin } from 'rxjs';
 
 @Component({

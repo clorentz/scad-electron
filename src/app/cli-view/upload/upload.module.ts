@@ -5,7 +5,7 @@ import { MatButtonModule, MatDialogModule, MatListModule, MatProgressBarModule }
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { HttpClientModule } from '@angular/common/http';
-import { ApiCallerService } from './api-caller.service';
+import { ApiCallerService } from '../api-caller.service';
 import { DialogComponent } from './dialog/dialog.component';
 
 @NgModule({
