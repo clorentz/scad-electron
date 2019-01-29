@@ -12,18 +12,18 @@
   </li>
 </ul>
 
-<div *ngIf="selectedFile">
-
-  <h2>{{selectedFile.name | uppercase}} Details</h2>
-  <div><span>File id: </span>{{selectedFile.fileId}}</div>
-  <div><span>Key id: </span>{{selectedFile.keyId}}</div>
-  <button (click)="delete(selectedFile.name);">
+<div *ngIf="isSelected">
+  <button (click)="delete(selectedFile.name);" class="delete">
     Delete File
   </button>
-  <button (click)="download(selectedFile.name);">
+  <button (click)="download(selectedFile.name);" class="download">
     Download File
   </button>
-  <a routerLink="/cli/file-rights/{{selectedFile.name}}">Change user rights</a>
+  <a routerLink="/cli/file-rights/{{selectedFile.name}}">
+    <button class="access">
+      Change user rights
+    </button>
+  </a>
 </div>
 <div class="upload">
   <app-upload></app-upload>

@@ -15,6 +15,8 @@ const httpOptions = {
 export class CliViewComponent implements OnInit {
   files : File[] = new Array();
   selectedFile: File;
+  isSelected: boolean = false;
+
   constructor(private http:HttpClient, private apiCallerService: ApiCallerService) { 
     this.getFileList();
   }
@@ -51,6 +53,7 @@ export class CliViewComponent implements OnInit {
   }
 
   onSelect(file: File): void {
+    this.isSelected = this.isSelected ? false : true;
     this.selectedFile = file;
   }
 
