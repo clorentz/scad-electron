@@ -7,9 +7,9 @@ import { FileRightsComponent } from './cli-view/file-rights/file-rights.componen
 
 
 const routes: Routes = [
+  { path: '', redirectTo: 'cli/home', pathMatch: 'full'},
   { path: 'cli/home', component: CliViewComponent },
   { path: 'admin', component: AdminViewComponent },
-  {path:'cli/login', component: CliLoginComponent},
   {path: 'cli/file-rights/:name', component: FileRightsComponent}
 ];
 

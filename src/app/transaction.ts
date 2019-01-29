@@ -1,6 +1,8 @@
 export class Transaction {
+    Index: number;
     DocumentId: string;
     Owner: String;
     User: String[];
-    Timestamp: String;
+    Type: String;
+    TimeStamp: String;
 }

@@ -22,15 +22,22 @@ export class AdminViewComponent implements OnInit {
   ngOnInit() {
     console.log("test")
     this.adminviewservice.getAllAdd().then((value) => {
+      this.transactionsAdd=[];this.testAdd=[];
       this.testAdd.push(value);
       this.transactionsAdd=this.testAdd;
+      console.log("hello on nginit add");
+      console.log(this.testAdd)
     }).catch((error)=>console.error(error));
 
     console.log("test 2")
     this.adminviewservice.getAllDelete().then((value) => {
+      this.testDelete=[];this.transactionsDelete=[];
       this.testDelete.push(value);
       this.transactionsDelete=this.testDelete;
+      console.log("hello on nginit");
+      console.log(this.transactionsDelete)
     }).catch((error)=>console.error(error));
+
     //this.transactions = this.adminviewservice.getAll();
   }
   onClickMe(){
