@@ -95,4 +95,13 @@ export class ApiCallerService {
       console.log("Error occured: " + err);
     });
   }
+
+  getFile(name) {
+    let body = JSON.stringify({"name": name});
+    return this.http.post('http://localhost:3002/getFile/', body, httpOptions);
+  }
+
+  getUsers() {
+    return this.http.get('http://localhost:3002/getUsers');
+  }
 }

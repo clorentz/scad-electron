@@ -13,6 +13,7 @@ import { CliLoginComponent } from './cli-login/cli-login.component';
 import { NgxElectronModule } from 'ngx-electron';
 import { HttpClientModule } from '@angular/common/http';
 import { UploadModule } from './cli-view/upload/upload.module';
+import { FileRightsComponent } from './cli-view/file-rights/file-rights.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { UploadModule } from './cli-view/upload/upload.module';
     CliViewComponent,
     AdminViewComponent,
     CliLoginComponent,
+    FileRightsComponent,
    ],
   imports: [
     BrowserModule,

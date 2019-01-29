@@ -23,6 +23,7 @@
   <button (click)="download(selectedFile.name);">
     Download File
   </button>
+  <a routerLink="/cli/file-rights/{{selectedFile.name}}">Change user rights</a>
 </div>
 <div class="upload">
   <app-upload></app-upload>

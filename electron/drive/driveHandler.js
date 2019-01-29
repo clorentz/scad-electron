@@ -7,7 +7,6 @@ const IncomingForm = require('formidable').IncomingForm;
 class driveHandler {
     
     constructor(SCOPES, TOKEN_PATH) {
-        console.log(__filename);
         this.SCOPES = SCOPES;
         this.TOKEN_PATH = TOKEN_PATH;
         fs.readFile("./tokens/credentials.json", (err, content) => {
@@ -72,10 +71,10 @@ authorize(credentials) {
     });
   }
 
-/**
- * Lists the names and IDs of up to 10 files.
- * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- */
+  /**
+   * Lists the names and IDs of up to 10 files.
+   * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+   */
   async listFiles() {
     var auth = this.auth;
     const drive = google.drive({ version: 'v3', auth });
@@ -89,9 +88,9 @@ authorize(credentials) {
   /* Function to create and upload a file 
      Usage: node drive.js create path
   */
-  async createFile(name, filePath) {
+  async createFile(name, filePath, fileKeys) {
     let auth = this.auth;
-    let res = {"fileId": "", "keyId": "", "name": name};
+    let res = {"fileId": "", "keyId": "", "name": name, keys: fileKeys};
     var drive = google.drive({ version: 'v3', auth });
     var fileMetadata = {
       'name': name

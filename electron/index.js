@@ -18,8 +18,9 @@ expressApp.use(express.json());
 // const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 const TOKEN_PATH = './tokens/token.json';
+const login = "bob";
 var database;
-var cipherHandler = new CipherHandler();
+var cipherHandler = new CipherHandler(login);
 var driveHandler = new DriveHandler(SCOPES, TOKEN_PATH);
 
 var MongoClient = require('mongodb').MongoClient;
@@ -57,6 +58,17 @@ expressApp.get("/clean", (req, res) => {
   driveHandler.cleanDrive(); 
   res.json({"res": "Drive cleaned"});
 });
+expressApp.get("/getUsers", (req, res) => {
+  database.db("scad").collection("usersCollection").find({}).toArray(function(err, result) {
+    if (err) throw err;
+    res.json(result);
+  });
+});
+expressApp.post("/getFile", (req, res) => {
+  let file = database.db("scad").collection("filesCollection").findOne({name: req.body.name});
+  res.json(file);
+});
+
 expressApp.listen(3002);
 console.log("Express started");
 // Keep a global reference of the window object, if you don't, the window will
