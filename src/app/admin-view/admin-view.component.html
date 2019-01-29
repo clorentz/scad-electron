@@ -1,3 +1,22 @@
+<h1> Welcome to the admin page! You can see your blockchain transaction here</h1>
+
+<h2>Transactions</h2>
+
+ <ul class="transactions">
+   <li *ngFor="let transaction of transactionsAdd[0];let i = index">
+    <span class="badge">{{i}}</span> [{{transaction.User}}] {{transaction.DocumentId}} {{transaction.Timestamp}}
+  <li>
+  </ul>
+
+
+  <h2>Transactions Delete</h2>
+
+  <ul class="transactions">
+    <li *ngFor="let transaction of transactionsDelete[0];let i = index">
+     <span class="badge">{{i}}</span> [{{transaction.User}}] {{transaction.DocumentId}} {{transaction.Timestamp}}
+   <li>
+   </ul>
+
 <p>
-  admin-view works!
+  <button (click)="onClickMe()">Click me!</button>
 </p>
