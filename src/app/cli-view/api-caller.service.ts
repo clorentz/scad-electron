@@ -104,4 +104,30 @@ export class ApiCallerService {
   getUsers() {
     return this.http.get('http://localhost:3002/getUsers');
   }
+
+  addUserBlockchain(name, file) {
+    let body = JSON.stringify({ 
+      '$class': 'org.example.mynetwork.AddUser',
+      "document": file.toString(),
+      "userToAdd": name.toString() 
+    });
+    this.http.post("http://192.168.43.176:3000/api/AddUser", body, httpOptions).subscribe(res => {
+      console.log("Operation on blockchin successful");
+    }, err => {
+      console.error(err);
+    }
+    
+    );
+  }
+
+  removeUserBlockchain(name, file) {
+    let body = JSON.stringify({ 
+      '$class': 'org.example.mynetwork.DeleteUser',
+      "document": file.toString(),
+      "userToDelete": name.toString()
+    });
+    this.http.post("http://192.168.43.176:3000/api/DeleteUser", body, httpOptions).subscribe(res => {
+      console.log("Operation on blockchin successful");
+    });
+  }
 }

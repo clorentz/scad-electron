@@ -18,10 +18,12 @@ expressApp.use(express.json());
 // const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 const TOKEN_PATH = './tokens/token.json';
-const login = "bob";
+const BLOCKCHAIN_URL = 'http://172.20.10.2:3000';
+
+const login = "u1";
 var database;
 var cipherHandler = new CipherHandler(login);
-var driveHandler = new DriveHandler(SCOPES, TOKEN_PATH);
+var driveHandler = new DriveHandler(SCOPES, TOKEN_PATH, BLOCKCHAIN_URL);
 
 var MongoClient = require('mongodb').MongoClient;
 var dbUrl = "mongodb://localhost:27017/";
@@ -38,7 +40,7 @@ cipherHandler.setDriveHandler(driveHandler);
 driveHandler.setCipherHandler(cipherHandler);
 
 expressApp.post("/upload", (req, res) => {
-  cipherHandler.encrypt(req, res).then(ret => res.json(ret));
+  cipherHandler.formEncrypt(req, res).then(ret => res.json(ret));
 });
 
 expressApp.post("/download", (req, res) => {
@@ -65,8 +67,20 @@ expressApp.get("/getUsers", (req, res) => {
   });
 });
 expressApp.post("/getFile", (req, res) => {
-  let file = database.db("scad").collection("filesCollection").findOne({name: req.body.name});
-  res.json(file);
+  database.db("scad").collection("filesCollection").findOne({name: req.body.name}).then(file => {
+    console.log(file);
+    res.json(file);
+  });
+});
+expressApp.post("/changeRights", (req, res) => {
+  let name = req.name;
+  let keys = req.keys;
+  driveHandler.downloadFile(name).then(dlRes => {
+    driveHandler.deleteFile(name);
+    cipherHandler.encrypt(name, `tmp/${name}.download`, keys).then(res => {
+      res.json(res);
+    });
+  }); 
 });
 
 expressApp.listen(3002);

@@ -3,12 +3,14 @@ const readline = require('readline');
 const { google } = require('googleapis');
 const path = require('path');
 const IncomingForm = require('formidable').IncomingForm;
+var request = require('request');
 
 class driveHandler {
     
-    constructor(SCOPES, TOKEN_PATH) {
+    constructor(SCOPES, TOKEN_PATH, BLOCKCHAIN_URL) {
         this.SCOPES = SCOPES;
         this.TOKEN_PATH = TOKEN_PATH;
+        this.BLOCKCHAIN_URL = BLOCKCHAIN_URL;
         fs.readFile("./tokens/credentials.json", (err, content) => {
             if (err) return console.log('Error loading client secret file:', err);
             this.authorize(JSON.parse(content));
@@ -122,6 +124,20 @@ authorize(credentials) {
     res.keyId = keyRes.data.id;
     fs.unlinkSync(filePath+".key");
     this.db.collection('filesCollection').insertOne(res);
+    var jsonUpload= {
+      "$class": "org.example.mynetwork.Document",
+      "DocumentId" : res.fileId.toString(),
+      "owner": "u1",
+      "description": "test",
+      "UsersWithAccess": [
+        "u1"
+      ]
+    };
+    request.post(this.BLOCKCHAIN_URL+'/api/Document',{json: jsonUpload}, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+          console.log(body)
+      }
+    });
     return res;
   }
   
@@ -205,7 +221,7 @@ authorize(credentials) {
   
   /* Function used to call the api and download a file by Id
   */
-  downloadFile(name) {
+  async downloadFile(name) {
     let auth = this.auth;
     const drive = google.drive({ version: 'v3', auth });
     var crypted_dest = fs.createWriteStream(`./tmp/${name}_encrypted_download`);

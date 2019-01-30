@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatButtonModule, MatCheckboxModule, MatToolbarModule,  MatFormFieldModule, MatInputModule} from '@angular/material';
+// import { FormGroup, FormBuilder, FormArray, FormControl } from '@angular/forms';
 import 'hammerjs';
 
 
@@ -24,6 +25,10 @@ import { FileRightsComponent } from './cli-view/file-rights/file-rights.componen
     FileRightsComponent,
    ],
   imports: [
+    // FormGroup, 
+    // FormBuilder, 
+    // FormArray, 
+    // FormControl,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,

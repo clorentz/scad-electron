@@ -38,12 +38,46 @@ class cipherHandler {
             this.db.collection("usersCollection").insertOne({"login": this.login, "pubKey": this.keys.public});
         }
     }
+    
+    async encrypt(name, filePath, userKeys) {
+        const initVect = crypto.randomBytes(16);
 
+        // Generation of a random Key
+        const CIPHER_KEY = crypto.randomBytes(32);
+        const readStream = fs.createReadStream(filePath); // The file to encrypt
+        const cipher = crypto.createCipheriv('aes256', CIPHER_KEY, initVect); // The cipher
+        const appendInitVect = new AppendInitVect(initVect); // AppendInitVect to append it tothe file after encryption
+        // Create a write stream with a different file extension.
+        const writeStream = fs.createWriteStream(path.join(filePath + ".enc"));
+
+        readStream
+            .pipe(cipher)
+            .pipe(appendInitVect)
+            .pipe(writeStream)
+
+
+        var cipherKeyFile = fs.createWriteStream(filePath + ".key"); // Creation of the key File
+        // Asymetric encryption of the file key 
+        // The base64 option allows to keep the correct key size
+        let keysArray = [keys.public];
+        if (userKeys !== undefined) {
+            userKeys.forEach(key => {
+                keysArray.push(key);
+            });
+        }
+        let encKey = crypt.encrypt(keysArray, CIPHER_KEY.toString('base64'));
+        let encryptedKey = JSON.parse(encKey);
+        cipherKeyFile.write(encryptedKey.iv + encryptedKey.cipher);
+        writeStream.on('finish', () => {
+            console.log("File encrypted");
+            this.driveHandler.createFile(name, filePath, encryptedKey.keys).then(ret => {return;}); // call for the upload of the file
+        });
+    }
     /* 
  * Function in which will be integrated the file encryption 
  * @param Path of the file to be encrypted
  */
-    async encrypt(req, res, userKeys) {
+    async formEncrypt(req, res, userKeys) {
         var form = new IncomingForm();
         var keys = this.keys;
         form.on('file', (field, file) => {
